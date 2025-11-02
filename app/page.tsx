@@ -3,6 +3,28 @@
 import { useState, useEffect } from 'react';
 import { useChatbot } from '../context/ChatbotContext';
 
+// Fonction utilitaire pour les badges de phase
+const getPhaseBadge = (phase: string) => {
+  let colorClass = 'bg-gray-200 text-gray-800';
+  switch (phase.toLowerCase()) {
+    case 'to do':
+      colorClass = 'bg-blue-100 text-blue-800';
+      break;
+    case 'done':
+      colorClass = 'bg-green-100 text-green-800';
+      break;
+    case 'nrp': // Non Répondu
+      colorClass = 'bg-yellow-100 text-yellow-800';
+      break;
+    case 'fermée perdue':
+      colorClass = 'bg-red-100 text-red-800';
+      break;
+    default:
+      break;
+  }
+  return <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${colorClass}`}>{phase}</span>;
+};
+
 interface Appointment {
   id: string;
   leadDate: string;
@@ -131,40 +153,44 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-background text-foreground p-8">
-      <h1 className="text-4xl font-bold mb-8 text-center">
-        Dashboard des Rendez-vous Sales
-      </h1>
-      <h2 className="text-2xl font-semibold mb-8 text-center text-gray-600">
-        Rendez-vous du {todayFormatted}
-      </h2>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <h1 className="text-5xl font-extrabold mb-4 text-center text-foreground">
+          Dashboard des Rendez-vous Sales
+        </h1>
+        <h2 className="text-2xl font-semibold mb-10 text-center text-gray-500">
+          Rendez-vous du {todayFormatted}
+        </h2>
 
-      {Object.keys(groupedAppointments).length === 0 ? (
-        <p className="text-center text-xl text-gray-500">Aucun rendez-vous planifié pour aujourd'hui.</p>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {Object.entries(groupedAppointments).map(([salesName, appointments]) => (
-            <div key={salesName} className="bg-white shadow-lg rounded-lg p-6 border border-gray-200">
-              <h3 className="text-2xl font-bold mb-4 text-primary-600">{salesName}</h3>
-              <div className="space-y-4">
-                {appointments.map((app, index) => (
-                  <div
-                    key={index}
-                    className="border-b border-gray-100 pb-4 last:border-b-0 last:pb-0 cursor-pointer hover:bg-gray-50 transition-colors duration-200"
-                    onClick={() => handleAppointmentClick(app)}
-                  >
-                    <p className="text-lg font-semibold text-gray-800">
-                      {app.appointmentTime ? `${app.appointmentTime} - ` : ''} {app.contact}
-                    </p>
-                    {app.companyName && <p className="text-md font-medium text-gray-700">Entreprise: {app.companyName}</p>}
-                    <p className="text-sm text-gray-600">Phase: {app.appointmentPhase}</p>
-                    {app.campaignName && <p className="text-xs text-gray-500">Campagne: {app.campaignName}</p>}
-                  </div>
-                ))}
+        {Object.keys(groupedAppointments).length === 0 ? (
+          <p className="text-center text-xl text-gray-500 mt-16">Aucun rendez-vous planifié pour aujourd'hui.</p>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {Object.entries(groupedAppointments).map(([salesName, appointments]) => (
+              <div key={salesName} className="bg-gradient-to-br from-white to-gray-50 shadow-xl rounded-xl p-6 border border-gray-100 hover:shadow-2xl transform hover:-translate-y-1 transition-all duration-300">
+                <h3 className="text-2xl font-bold mb-4 text-blue-700">{salesName}</h3>
+                <div className="space-y-4">
+                  {appointments.map((app, index) => (
+                    <div
+                      key={index}
+                      className="bg-white p-4 rounded-lg shadow-sm border border-gray-100 cursor-pointer hover:bg-blue-50 transition-colors duration-200"
+                      onClick={() => handleAppointmentClick(app)}
+                    >
+                      <p className="text-lg font-semibold text-gray-900">
+                        {app.appointmentTime ? `${app.appointmentTime} - ` : ''} {app.contact}
+                      </p>
+                      {app.companyName && <p className="text-md font-medium text-blue-600 mt-1">Entreprise: {app.companyName}</p>}
+                      <div className="mt-2 flex items-center space-x-2">
+                        {getPhaseBadge(app.appointmentPhase)}
+                        {app.campaignName && <span className="text-xs text-gray-500">Campagne: {app.campaignName}</span>}
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
-      )}
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
